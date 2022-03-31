@@ -24,7 +24,6 @@ public class Articulo extends javax.swing.JDialog {
         initComponents();
         setResizable(false);
         Store.centerFrame(this);
-        this.inputCalculadora.setEditable(false);
         this.producto = p;
         this.mapFields();
         Store.attachKeys(this, true);
@@ -36,24 +35,23 @@ public class Articulo extends javax.swing.JDialog {
     
     public void mapFields(){
         this.labelId.setText("---");
-        this.labelTitle.setText("Actualizar artículo");
+        this.labelTitle.setText("Actualizar producto");
         this.btnEliminar.setVisible(true);
         if (this.producto == null || this.producto.id == 0){
             this.producto = new Producto();
-            this.labelTitle.setText("Crear nuevo artículo");
+            this.labelTitle.setText("Nuevo producto");
             this.btnEliminar.setVisible(false);
             return;
         }
         this.labelId.setText(String.valueOf(this.producto.id));
         this.inputDescripcion.setText(this.producto.descripcion);
-        this.inputCodigoBarras.setText(String.valueOf(this.producto.codigo_barras));
-        this.inputCodigoAlterno.setText(this.producto.codigo_alterno);
+        this.inputCodigoBarras.setText(this.producto.codigo_barras);
+        this.inputExistencia.setText(String.valueOf(this.producto.existencia));
         if (this.producto.id > 0){
-        this.inputIva.setText(String.format("%f", this.producto.iva));
         this.inputCosto.setText(String.format("%f", this.producto.costo));
         this.inputPrecio.setText(String.format("%f", this.producto.precio));
         }
-        this.calcularPrecios();
+        this.checkMateriaPrima.setSelected(this.producto.materia_prima == true);
     }
 
     /**
@@ -67,6 +65,7 @@ public class Articulo extends javax.swing.JDialog {
 
         jPanel1 = new javax.swing.JPanel();
         labelTitle = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
@@ -77,47 +76,56 @@ public class Articulo extends javax.swing.JDialog {
         jLabel4 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         inputCodigoBarras = new javax.swing.JTextField();
-        inputIva = new javax.swing.JTextField();
-        jLabel9 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         inputCosto = new javax.swing.JTextField();
-        inputCodigoAlterno = new javax.swing.JTextField();
+        inputExistencia = new javax.swing.JTextField();
         jLabel14 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
         inputPrecio = new javax.swing.JTextField();
-        inputCalculadora = new javax.swing.JTextField();
-        jLabel13 = new javax.swing.JLabel();
         labelId = new javax.swing.JLabel();
+        checkMateriaPrima = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Artículo");
         setBackground(new java.awt.Color(255, 255, 255));
         setResizable(false);
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jPanel1.setBackground(new java.awt.Color(0, 109, 186));
-        jPanel1.setForeground(new java.awt.Color(0, 109, 186));
+        jPanel1.setBackground(new java.awt.Color(255, 54, 159));
+        jPanel1.setForeground(new java.awt.Color(255, 54, 159));
 
         labelTitle.setBackground(new java.awt.Color(255, 255, 255));
         labelTitle.setFont(labelTitle.getFont().deriveFont(labelTitle.getFont().getSize()+6f));
         labelTitle.setForeground(new java.awt.Color(255, 255, 255));
         labelTitle.setText("TITLE");
 
+        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/logo-pink.png"))); // NOI18N
+        jLabel5.setText("jLabel2");
+        jLabel5.setMaximumSize(new java.awt.Dimension(200, 61));
+        jLabel5.setPreferredSize(new java.awt.Dimension(200, 61));
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(18, 18, 18)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(labelTitle)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(21, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(labelTitle)
                 .addGap(20, 20, 20))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
+
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 460, -1));
 
         jPanel2.setBackground(new java.awt.Color(190, 190, 190));
         jPanel2.setForeground(new java.awt.Color(0, 109, 186));
@@ -188,11 +196,13 @@ public class Articulo extends javax.swing.JDialog {
 
         jPanel2Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jButton1, jButton3});
 
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 310, 460, -1));
+
         jLabel2.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         jLabel2.setText("ID");
 
         jLabel4.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        jLabel4.setText("Descripción");
+        jLabel4.setText("Nombre");
 
         jLabel3.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         jLabel3.setText("Código de barras");
@@ -202,9 +212,6 @@ public class Articulo extends javax.swing.JDialog {
                 inputCodigoBarrasActionPerformed(evt);
             }
         });
-
-        jLabel9.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        jLabel9.setText("IVA");
 
         jLabel11.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         jLabel11.setText("Costo");
@@ -221,7 +228,7 @@ public class Articulo extends javax.swing.JDialog {
         });
 
         jLabel14.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        jLabel14.setText("Código alterno");
+        jLabel14.setText("Existencia");
 
         jLabel12.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
         jLabel12.setText("Precio");
@@ -237,18 +244,10 @@ public class Articulo extends javax.swing.JDialog {
             }
         });
 
-        inputCalculadora.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                inputCalculadoraKeyReleased(evt);
-            }
-        });
-
-        jLabel13.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
-        jLabel13.setText("Calculadora de total");
-
         labelId.setBackground(new java.awt.Color(255, 255, 255));
-        labelId.setForeground(new java.awt.Color(0, 0, 0));
         labelId.setText("jLabel1");
+
+        checkMateriaPrima.setText("Es materia prima.");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -257,20 +256,28 @@ public class Articulo extends javax.swing.JDialog {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel3Layout.createSequentialGroup()
+                    .addComponent(checkMateriaPrima, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(inputPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel12))
+                            .addComponent(jLabel11)
+                            .addComponent(inputCosto, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel13)
-                            .addComponent(inputCalculadora, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(inputIva)
-                        .addGap(238, 238, 238))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jLabel12)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(inputPrecio))
+                        .addGap(6, 6, 6))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(inputCodigoBarras, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel3))
+                                .addGap(18, 18, 18)
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel14)
+                                    .addComponent(inputExistencia, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel2)
@@ -278,87 +285,48 @@ public class Articulo extends javax.swing.JDialog {
                                 .addGap(36, 36, 36)
                                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel4)
-                                    .addComponent(inputDescripcion, javax.swing.GroupLayout.PREFERRED_SIZE, 328, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(inputCodigoBarras, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel3)
-                                    .addComponent(jLabel9))
-                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel3Layout.createSequentialGroup()
-                                        .addGap(18, 18, 18)
-                                        .addComponent(jLabel14)
-                                        .addGap(0, 0, Short.MAX_VALUE))
-                                    .addGroup(jPanel3Layout.createSequentialGroup()
-                                        .addGap(21, 21, 21)
-                                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(inputCosto)
-                                            .addComponent(jLabel11)))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(inputCodigoAlterno, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                        .addContainerGap())))
+                                    .addComponent(inputDescripcion, javax.swing.GroupLayout.PREFERRED_SIZE, 328, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGap(15, 15, 15)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(inputDescripcion)
-                            .addComponent(labelId, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel3)
+                        .addComponent(jLabel12)
+                        .addGap(28, 28, 28))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel2))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(inputDescripcion)
+                                    .addComponent(labelId, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jLabel3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(inputCodigoBarras, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(inputExistencia, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(30, 30, 30)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(inputCodigoBarras, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(inputCodigoAlterno, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(30, 30, 30)))
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel9)
-                    .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(inputIva, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(inputCosto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(inputCosto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(inputPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel12)
-                    .addComponent(jLabel13))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(inputPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(inputCalculadora, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(22, Short.MAX_VALUE))
+                .addComponent(checkMateriaPrima)
+                .addContainerGap(41, Short.MAX_VALUE))
         );
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(12, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
+        getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, -1, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -389,17 +357,14 @@ public class Articulo extends javax.swing.JDialog {
                 throw new Exception("El codigo de barras es invalido.");
             }
             
-            p.codigo_alterno = this.inputCodigoAlterno.getText();
-            if (p.codigo_alterno.length() <= 0){
-                // throw new Exception("El codigo alterno no puede estar vacio.");
-                p.codigo_alterno = p.codigo_barras;
+            String existenciaTxt = this.inputExistencia.getText();
+            float existencia = existenciaTxt.length() <= 0 ? 0 : Float.valueOf(existenciaTxt);
+            if (Float.isNaN(existencia) || !Float.isFinite(existencia)){
+                throw new Exception("La existencia es invalida.");
             }
             
-            if (this.inputIva.getText().length() <= 0 || Float.valueOf(this.inputIva.getText()) < 0){
-                throw new Exception("El IVA es invalido.");
-            }
             
-            p.iva = Float.valueOf(this.inputIva.getText());
+            p.existencia = existencia;
             
             if (this.inputCosto.getText().length() <= 0 || Float.valueOf(this.inputCosto.getText()) < 0){
                 throw new Exception("El costo es invalido.");
@@ -412,6 +377,7 @@ public class Articulo extends javax.swing.JDialog {
             }
             
             p.precio = Float.valueOf(this.inputPrecio.getText());
+            p.materia_prima = this.checkMateriaPrima.isSelected();
             
             p.save();
             this.dispose();
@@ -442,12 +408,7 @@ public class Articulo extends javax.swing.JDialog {
 
     private void inputPrecioKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inputPrecioKeyReleased
         // TODO add your handling code here:
-        this.calcularPrecios();
     }//GEN-LAST:event_inputPrecioKeyReleased
-
-    private void inputCalculadoraKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inputCalculadoraKeyReleased
-        // TODO add your handling code here:
-    }//GEN-LAST:event_inputCalculadoraKeyReleased
 
     private void inputCostoKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inputCostoKeyReleased
         // TODO add your handling code here:
@@ -469,15 +430,6 @@ public class Articulo extends javax.swing.JDialog {
         this.dispose();
     }//GEN-LAST:event_btnEliminarActionPerformed
 
-    private void calcularPrecios(){
-        try{
-        float precio = Float.valueOf(this.inputPrecio.getText());
-        float iva = Float.valueOf(this.inputIva.getText());
-        float ivaAgregado = (iva / 100) * precio;
-        float total = precio + ivaAgregado;
-        this.inputCalculadora.setText(String.format("$%.2f MXN", total));
-        }catch(Exception e){}
-    }
     /**
      * @param args the command line arguments
      */
@@ -523,23 +475,21 @@ public class Articulo extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEliminar;
-    private javax.swing.JTextField inputCalculadora;
-    private javax.swing.JTextField inputCodigoAlterno;
+    private javax.swing.JCheckBox checkMateriaPrima;
     private javax.swing.JTextField inputCodigoBarras;
     private javax.swing.JTextField inputCosto;
     private javax.swing.JTextField inputDescripcion;
-    private javax.swing.JTextField inputIva;
+    private javax.swing.JTextField inputExistencia;
     private javax.swing.JTextField inputPrecio;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel9;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;

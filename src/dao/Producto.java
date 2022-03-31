@@ -20,12 +20,9 @@ public class Producto {
     public float existencia;
     public String descripcion;
     public String codigo_barras;
-    public String codigo_alterno;
     public float costo;
     public float precio;
-    public float iva;
-    public String clave_servicio;
-    public String clave_unidad;
+    public boolean materia_prima;
     public static int totalRows = 0;
 
     public Producto() {
@@ -33,12 +30,9 @@ public class Producto {
         existencia = 0;
         descripcion = "";
         codigo_barras = "";
-        codigo_alterno = "";
         costo = 0;
         precio = 0;
-        iva = 0;
-        clave_servicio = "";
-        clave_unidad = "";
+        materia_prima = false;
     }
 
     /**
@@ -52,11 +46,11 @@ public class Producto {
             }
 
             String sql = String.format("insert or replace into productos "
-                    + "(id, existencia, descripcion, codigo_barras, codigo_alterno,"
-                    + "costo, precio, iva, clave_servicio, clave_unidad) values"
-                    + "(%d, %.6f, '%s', '%s', '%s', %.2f, %.2f, %.2f, '%s', '%s')",
-                    this.id, existencia, descripcion, codigo_barras, codigo_alterno,
-                    costo, precio, iva, clave_servicio, clave_unidad);
+                    + "(id, existencia, descripcion, codigo_barras, "
+                    + "costo, precio, materia_prima) values"
+                    + "(%d, %.6f, '%s', '%s', %.2f, %.2f, %d)",
+                    this.id, existencia, descripcion, codigo_barras,
+                    costo, precio, materia_prima == true ? 1 : 0);
             System.out.println(sql);
             Statement s = Store.drv.createQuery();
             s.executeUpdate(sql);
@@ -88,12 +82,9 @@ public class Producto {
         p.existencia = rs.getFloat("existencia");
         p.descripcion = rs.getString("descripcion");
         p.codigo_barras = rs.getString("codigo_barras");
-        p.codigo_alterno = rs.getString("codigo_alterno");
+        p.materia_prima = rs.getInt("materia_prima") == 1;
         p.costo = rs.getFloat("costo");
         p.precio = rs.getFloat("precio");
-        p.iva = rs.getFloat("iva");
-        p.clave_servicio = rs.getString("clave_servicio");
-        p.clave_unidad = rs.getString("clave_unidad");
         return p;
     }
 
@@ -127,9 +118,9 @@ public class Producto {
             String sql = "select * from productos where 1 ";
             if (Store.isNumeric(keyword)) {
                 int code = Integer.valueOf(keyword);
-                sql += String.format("and (id=%d or codigo_barras=%d or codigo_alterno='%s')", code, code, keyword);
+                sql += String.format("and (id=%d or codigo_barras=%d)", code, code, keyword);
             } else if (keyword != null && keyword.length() > 0) {
-                sql += String.format("and (descripcion like '%%%s%%' or codigo_alterno='%s')", keyword, keyword);
+                sql += String.format("and (descripcion like '%%%s%%')", keyword, keyword);
             }
 
             Statement s = Store.drv.createQuery();
@@ -155,9 +146,5 @@ public class Producto {
         return rs.getInt("id") + 1;
     }
 
-    @Override
-    public String toString() {
-        return "Producto{" + "id=" + id + ", existencia=" + existencia + ", descripcion=" + descripcion + ", codigo_barras=" + codigo_barras + ", codigo_alterno=" + codigo_alterno + ", costo=" + costo + ", precio=" + precio + ", iva=" + iva + ", clave_servicio=" + clave_servicio + ", clave_unidad=" + clave_unidad + '}';
-    }
-
+   
 }

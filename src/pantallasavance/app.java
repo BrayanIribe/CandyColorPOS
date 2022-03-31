@@ -62,10 +62,8 @@ public class app {
                     Logger.getLogger(app.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 splash.dispose();
-                /* pantallaInicio inicio = new pantallaInicio();
-                inicio.setVisible(true); */
-                Clientes cliente = new Clientes(null, false);
-                cliente.setVisible(true);
+                PantallaPrincipal inicio = new PantallaPrincipal();
+                inicio.setVisible(true);
             }
         };
 

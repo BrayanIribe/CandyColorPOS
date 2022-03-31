@@ -45,21 +45,19 @@ public class Driver {
         // crear tabla de productos
         statement.executeUpdate("create table if not exists productos "
                 + "(id integer primary key, existencia float, descripcion string,"
-                + "codigo_barras string, codigo_alterno string, costo float,"
-                + "precio float, iva float, clave_servicio string, clave_unidad string,"
-                + "updatedAt integer, createdAt integer)");
+                + "codigo_barras string, costo float, precio float, "
+                + "materia_prima integer, updatedAt integer, createdAt integer)");
         
         Producto p = Producto.findFirstById(1);
         if (p == null){
             p = new Producto();
             p.id = 1;
             p.descripcion = "Articulo de prueba";
-            p.iva = 16;
             p.existencia = 0;
             p.precio = 20;
             p.costo = 10;
             p.codigo_barras = "123";
-            p.codigo_alterno = "123";
+            p.materia_prima = false;
             p.save();
         }
 

@@ -26,6 +26,7 @@ public class Articulos extends javax.swing.JDialog {
      * Creates new form Articulos
      */
     public Vector<Producto> productos;
+    public Producto selectedProduct;
 
     public Articulos(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -40,6 +41,8 @@ public class Articulos extends javax.swing.JDialog {
                 JTable table = (JTable) mouseEvent.getSource();
                 Point point = mouseEvent.getPoint();
                 int row = table.rowAtPoint(point);
+                selectedProduct = productos.get(row);
+                btnEliminarProducto.setEnabled(true);
                 if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
                     if (row >= productos.size()) {
                         return;
@@ -52,11 +55,12 @@ public class Articulos extends javax.swing.JDialog {
             }
         });
         Store.attachKeys(this, false);
+        btnEliminarProducto.setEnabled(false);
     }
 
     public void query() {
         productos = Producto.find(this.inputKeyword.getText());
-        String[] header = {"Id", "Descripción", "Código de barras", "Código alterno", "Existencia", "Costo", "Precio"};
+        String[] header = {"Id", "Descripción", "Código de barras", "¿Es materia prima?", "Existencia", "Costo", "Precio"};
         DefaultTableModel dtm = new DefaultTableModel() {
             public boolean isCellEditable(int row, int column) {
                 return false;//This causes all cells to be not editable
@@ -70,7 +74,7 @@ public class Articulos extends javax.swing.JDialog {
             datos[0] = String.valueOf(p.id);
             datos[1] = p.descripcion;
             datos[2] = p.codigo_barras;
-            datos[3] = p.codigo_alterno;
+            datos[3] = p.materia_prima == true ? "Sí" : "No";
             datos[4] = String.format("%.2f", p.existencia);
             datos[5] = String.format("%.2f", p.costo);
             datos[6] = String.format("%.2f", p.precio);
@@ -98,18 +102,22 @@ public class Articulos extends javax.swing.JDialog {
         jScrollPane1 = new javax.swing.JScrollPane();
         table = new javax.swing.JTable();
         labelTooltip = new javax.swing.JLabel();
+        btnEliminarProducto = new javax.swing.JButton();
+        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Articulos");
         setResizable(false);
 
-        jPanel1.setBackground(new java.awt.Color(0, 109, 186));
-        jPanel1.setForeground(new java.awt.Color(0, 109, 186));
+        jPanel1.setBackground(new java.awt.Color(255, 54, 159));
+        jPanel1.setForeground(new java.awt.Color(255, 54, 159));
+        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         labelTitle.setBackground(new java.awt.Color(255, 255, 255));
         labelTitle.setFont(labelTitle.getFont().deriveFont(labelTitle.getFont().getSize()+6f));
         labelTitle.setForeground(new java.awt.Color(255, 255, 255));
-        labelTitle.setText("Artículos");
+        labelTitle.setText("Productos");
+        jPanel1.add(labelTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 20, -1, -1));
 
         inputKeyword.setToolTipText("Búsqueda por Id o descripción");
         inputKeyword.addActionListener(new java.awt.event.ActionListener() {
@@ -127,7 +135,7 @@ public class Articulos extends javax.swing.JDialog {
             }
         });
 
-        jLabel1.setText("Búsqueda de artículos por Id o descripción");
+        jLabel1.setText("Búsqueda de productos por Id o descripción");
 
         jButton3.setBackground(new java.awt.Color(186, 0, 0));
         jButton3.setForeground(new java.awt.Color(255, 255, 255));
@@ -155,6 +163,15 @@ public class Articulos extends javax.swing.JDialog {
 
         labelTooltip.setText("--- tooltip ---");
 
+        btnEliminarProducto.setBackground(new java.awt.Color(186, 0, 0));
+        btnEliminarProducto.setForeground(new java.awt.Color(255, 255, 255));
+        btnEliminarProducto.setText("Eliminar producto seleccionado");
+        btnEliminarProducto.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEliminarProductoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -172,10 +189,10 @@ public class Articulos extends javax.swing.JDialog {
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(labelTooltip)
-                        .addGap(8, 8, 8)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnEliminarProducto, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -191,28 +208,19 @@ public class Articulos extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(labelTooltip)
-                .addContainerGap(12, Short.MAX_VALUE))
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(labelTooltip)
+                    .addComponent(btnEliminarProducto))
+                .addContainerGap(9, Short.MAX_VALUE))
         );
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(18, 18, 18)
-                .addComponent(labelTitle)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(21, Short.MAX_VALUE)
-                .addComponent(labelTitle)
-                .addGap(18, 18, 18)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
+        jPanel1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 60, -1, 360));
+
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/logo-pink.png"))); // NOI18N
+        jLabel2.setText("jLabel2");
+        jLabel2.setMaximumSize(new java.awt.Dimension(200, 61));
+        jLabel2.setPreferredSize(new java.awt.Dimension(200, 61));
+        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -222,9 +230,7 @@ public class Articulos extends javax.swing.JDialog {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
@@ -247,6 +253,25 @@ public class Articulos extends javax.swing.JDialog {
         // TODO add your handling code here:
         this.query();
     }//GEN-LAST:event_inputKeywordActionPerformed
+
+    private void btnEliminarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarProductoActionPerformed
+        if (selectedProduct == null || selectedProduct.id <= 0){
+            return;
+        }
+
+        boolean isOk = Store.question("Confirmación", "¿Desea eliminar el producto '" + selectedProduct.descripcion + "'? Este cambio será irreversible.");
+        if (!isOk) {
+            return;
+        }
+
+        boolean result = selectedProduct.delete();
+        if (!result) {
+            Store.error("Error", "No se eliminó el producto.");
+            return;
+        }
+
+        this.query();
+    }//GEN-LAST:event_btnEliminarProductoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -291,10 +316,12 @@ public class Articulos extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnEliminarProducto;
     private javax.swing.JTextField inputKeyword;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
