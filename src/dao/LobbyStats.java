@@ -60,7 +60,7 @@ public class LobbyStats {
             p.total_compras = rs.getFloat("total_compras");
             sql = "select count(*) as cancelaciones "
                     + "from documentos_productos "
-                    + "where id_status=0 and es_salida=1";
+                    + "where id_status=0 and tipo_inv=1";
             s = Store.drv.createQuery();
             rs = s.executeQuery(sql);
             rs.next();

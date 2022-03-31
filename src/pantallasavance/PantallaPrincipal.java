@@ -137,7 +137,7 @@ public class PantallaPrincipal extends javax.swing.JFrame {
 
     private void btnPedidosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPedidosActionPerformed
         // TODO add your handling code here:
-        Sistema modal = new Sistema(this, rootPaneCheckingEnabled);
+        Documentos modal = new Documentos(this, rootPaneCheckingEnabled);
         modal.setVisible(true);
     }//GEN-LAST:event_btnPedidosActionPerformed
 

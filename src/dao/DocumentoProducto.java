@@ -18,7 +18,7 @@ public class DocumentoProducto {
 
     public int id;
     public int id_status; // 0=cancelado, 1=vigente, 2=devuelto
-    public boolean es_salida;
+    public int tipo_inv;
     public int id_documento;
     public int id_producto;
     public String descripcion;
@@ -35,7 +35,7 @@ public class DocumentoProducto {
         id_status = 1;
         id_documento = -1;
         id_producto = -1;
-        es_salida = true;
+        tipo_inv = 0;
         descripcion = "";
         cantidad = 0;
         costo = 0;
@@ -56,14 +56,12 @@ public class DocumentoProducto {
                 this.id = DocumentoProducto.getLastId();
             }
             
-            int $es_salida = es_salida == true ? 1 : 0;
-            
             String sql = String.format("insert or replace into documentos_productos "
-                    + "(id, id_status, es_salida, id_documento, id_producto, "
+                    + "(id, id_status, tipo_inv, id_documento, id_producto, "
                     + "descripcion, cantidad, costo, precio, impuestos, utilidades,"
                     + "existencia) values (%d, %d, %d, %d, %d, '%s',"
                     + "%.2f, %.2f, %.2f, %.2f, %.2f, %.2f)",
-                    this.id, id_status, $es_salida, id_documento, id_producto, descripcion,
+                    this.id, id_status, tipo_inv, id_documento, id_producto, descripcion,
                     cantidad, costo, precio, impuestos, utilidades, existencia);
 
             Statement s = Store.drv.createQuery();
@@ -152,13 +150,6 @@ public class DocumentoProducto {
             return 1;
         }
         return rs.getInt("id") + 1;
-    }
-
-    @Override
-    public String toString() {
-        return "DocumentoProducto{" + "id=" + id + ", id_status=" + id_status + ", es_salida=" + es_salida + ", id_documento=" + id_documento + ", id_producto=" + id_producto + ", descripcion=" + descripcion + ", cantidad=" + cantidad + ", costo=" + costo + ", precio=" + precio + ", impuestos=" + impuestos + ", utilidades=" + utilidades + ", existencia=" + existencia + ", producto=" + producto + '}';
-    }
-
-    
+    } 
     
 }

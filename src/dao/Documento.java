@@ -21,6 +21,7 @@ public class Documento {
     public int id_cliente_proveedor;
     public int id_tipo_documento;
     public int folio;
+    public String observaciones;
     public float subtotal;
     public float impuestos;
     public float total;
@@ -36,6 +37,7 @@ public class Documento {
         this.id_cliente_proveedor = -1;
         this.id_tipo_documento = -1;
         this.folio = 1;
+        this.observaciones = "";
         this.total = 0;
         this.efectivo = 0;
         this.tipo_cambio = 1;
@@ -58,10 +60,12 @@ public class Documento {
 
         for (DocumentoProducto c : conceptos) {
             c.id_status = 0;
+            if (this.tipo_documento.tipo != 2){
             if (esVenta) {
                 c.producto.existencia += c.cantidad;
             } else {
                 c.producto.existencia -= c.cantidad;
+            }
             }
             if (!c.producto.save()) {
                 return false;
@@ -85,10 +89,10 @@ public class Documento {
 
             String sql = String.format("insert or replace into documentos "
                     + "(id, id_status, id_cliente_proveedor, id_tipo_documento, "
-                    + "folio, total, efectivo, tipo_cambio) values "
-                    + "(%d, %d, %d, %d, %d, %.2f, %.2f, %.2f)",
+                    + "folio, observaciones, total, efectivo, tipo_cambio) values "
+                    + "(%d, %d, %d, %d, %d, '%s', %.2f, %.2f, %.2f)",
                     this.id, id_status, id_cliente_proveedor, id_tipo_documento,
-                    folio, total, efectivo, tipo_cambio);
+                    folio, observaciones, total, efectivo, tipo_cambio);
 
             Statement s = Store.drv.createQuery();
             s.executeUpdate(sql);
@@ -133,6 +137,7 @@ public class Documento {
         p.total = rs.getFloat("total");
         p.efectivo = rs.getFloat("efectivo");
         p.tipo_cambio = rs.getFloat("tipo_cambio");
+        p.observaciones = rs.getString("observaciones");
 
         if (p.id_cliente_proveedor > 0) {
             p.cliente = dao.Cliente.findFirstById(p.id_cliente_proveedor);
@@ -177,6 +182,31 @@ public class Documento {
         }
         return v;
     }
+    
+    public static Vector<Documento> findDocumentos(String keyword) {
+        Vector<Documento> v = new Vector<Documento>();
+        try {
+            String where = "";
+            if (keyword.length() > 0){
+                where += String.format(" and (c.nombre like '%%%s%%' or d.folio='%s') ", keyword, keyword);
+            }
+            String sql = String.format(
+                    "select d.* from documentos d "
+                            + "left join clientes c on d.id_cliente_proveedor = c.id "
+                            + " where d.id_status=1 %s order by d.id desc", where
+            );
+
+            Statement s = Store.drv.createQuery();
+            ResultSet rs = s.executeQuery(sql);
+            while (rs.next()) {
+                v.add(Documento.unserialize(rs));
+            }
+        } catch (Exception e) {
+            Store.error("Ha ocurrido un problema", e.getMessage());
+        }
+        return v;
+    }
+
 
     public static int getLastId() throws SQLException {
         String sql = String.format("select id from documentos order by id desc limit 1");

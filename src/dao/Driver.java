@@ -74,7 +74,7 @@ public class Driver {
         if (cliente == null || cliente.rfc != "XAXX0101000") {
             cliente = new Cliente();
             cliente.id = 1;
-            cliente.nombre = "Público en general";
+            cliente.nombre = "Publico en general";
             cliente.rfc = "XAXX0101000";
             cliente.save();
         }
@@ -86,6 +86,17 @@ public class Driver {
                 + "updatedAt integer, createdAt integer)");
 
         // crear documentos, en caso de no existir
+        TipoDocumento pedido = TipoDocumento.findFirstBySerie("P");
+        if (pedido == null) {
+            pedido = new TipoDocumento();
+            pedido.es_fiscal = false;
+            pedido.folio = 1;
+            pedido.nombre = "Pedido";
+            pedido.serie = "P";
+            pedido.tipo = 2;
+            pedido.save();
+        }
+        
         TipoDocumento remision = TipoDocumento.findFirstBySerie("R");
         if (remision == null) {
             remision = new TipoDocumento();
@@ -112,10 +123,10 @@ public class Driver {
         statement.executeUpdate("create table if not exists documentos "
                 + "(id integer primary key, id_status tinyint,"
                 + "id_cliente_proveedor integer, id_tipo_documento integer, folio integer,"
-                + "total float, efectivo float, tipo_cambio float)");
+                + "observaciones string, total float, efectivo float, tipo_cambio float)");
 
         statement.executeUpdate("create table if not exists documentos_productos "
-                + "(id integer primary key, id_status tinyint, es_salida tinyint,"
+                + "(id integer primary key, id_status tinyint, tipo_inv tinyint,"
                 + "id_documento integer, id_producto integer, descripcion string,"
                 + "cantidad float, costo float, precio float, impuestos float,"
                 + "utilidades float, existencia float)");

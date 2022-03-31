@@ -44,13 +44,21 @@ public class Sistema extends javax.swing.JDialog {
     /**
      * Creates new form Nosotros
      */
-    public Sistema(java.awt.Frame parent, boolean modal) {
+    public Sistema(java.awt.Frame parent, boolean modal, Documento documento) {
         super(parent, modal);
         initComponents();
         setResizable(false);
         Store.centerFrame(this);
         
         this.reset();
+        if (documento != null){
+            this.documento = documento;
+            this.inputObservaciones.setText(this.documento.observaciones);
+            this.inputCodigo.setEnabled(false);
+            this.btnSeleccionarCliente.setEnabled(false);
+            this.selectTipoDoc.setEnabled(false);
+            this.jButton1.setEnabled(false);
+        }
         this.mapFields();
         
         Sistema $vm = this;
@@ -158,6 +166,7 @@ public class Sistema extends javax.swing.JDialog {
         this.tableConceptos.setModel(dtm);
 
         this.documento = new Documento();
+        this.inputObservaciones.setText("");
         this.mapFields();
     }
 
@@ -188,13 +197,20 @@ public class Sistema extends javax.swing.JDialog {
         if (tipo_documento.tipo == 0){
             // salida
             this.labelInventario.setText("VENTA");
+            this.labelInventario.setForeground(Color.WHITE);
             this.labelInventario.setBackground(Color.RED);
             this.paneInventario.setBackground(Color.RED);
         }else if (tipo_documento.tipo == 1){
             // compra
             this.labelInventario.setText("COMPRA");
+            this.labelInventario.setForeground(Color.WHITE);
             this.labelInventario.setBackground(Color.DARK_GRAY);
             this.paneInventario.setBackground(Color.DARK_GRAY);
+        } else if (tipo_documento.tipo == 2){
+            this.labelInventario.setText("PEDIDO");
+            this.labelInventario.setForeground(Color.MAGENTA);
+            this.labelInventario.setBackground(Color.WHITE);
+            this.paneInventario.setBackground(Color.WHITE);
         }
         // mapear conceptos en la tabla
         if (dtm.getRowCount() > 0) {
@@ -237,8 +253,6 @@ public class Sistema extends javax.swing.JDialog {
 
             float faltante = $total - documento.efectivo;
             this.labelCodigo.setText("Efectivo");
-            this.labelSubtotal.setText(String.format("Total: $%.2f MXN", $total));
-            this.labelImpuestos.setText(String.format("Efectivo: $%.2f MXN", this.documento.efectivo));
             this.labelTotal.setText(String.format("Faltante: $%.2f MXN", faltante));
             this.labelTotal.setForeground(Color.red);
             if (faltante <= 0) {
@@ -249,7 +263,6 @@ public class Sistema extends javax.swing.JDialog {
         if (this.state == SystemState.CAMBIO) {
             float cambio = Math.abs(documento.efectivo - $total);
             this.labelTotal.setForeground(Color.BLACK);
-            this.labelImpuestos.setText("Efectivo: $0.00 MXN");
             this.labelTotal.setText(String.format("Cambio: $%.2f MXN", cambio));
         }
 
@@ -258,8 +271,6 @@ public class Sistema extends javax.swing.JDialog {
         }
 
         this.labelCodigo.setText("Código");
-        this.labelSubtotal.setText(String.format("Subtotal: $%.2f MXN", $subtotal));
-        this.labelImpuestos.setText(String.format("Impuestos: $%.2f MXN", $impuestos));
         this.labelTotal.setText(String.format("Total: $%.2f MXN", $total));
 
         this.documento.subtotal = $subtotal;
@@ -268,24 +279,29 @@ public class Sistema extends javax.swing.JDialog {
 
     }
 
+    public boolean subtotal(){
+            // actualizar la VM
+            this.mapFields();
+            if (this.documento.conceptos.size() <= 0
+                    || (this.documento.subtotal <= 0 && this.documento.tipo_documento.tipo == 0)) {
+                Store.error("Ha ocurrido un problema", "No puede terminar una cuenta en ceros.");
+                return false;
+            }
+
+            // volver a actualizar la VM
+            this.state = this.documento.tipo_documento.tipo == 2 ? SystemState.CAMBIO : SystemState.PAGO;
+            this.mapFields();
+            return true;
+    }
+    
     public void procesarCodigo(String cmd) {
 
         CmdType cmdType = CmdType.AGREGAR; // 0=agregar, 1=cancelar
         cmd = cmd.toLowerCase();
 
         if (cmd.equals("sbt") && this.state == SystemState.VENTA) {
-            // actualizar la VM
-            this.mapFields();
-            if (this.documento.conceptos.size() <= 0
-                    || (this.documento.subtotal <= 0 && this.documento.tipo_documento.tipo == 0)) {
-                Store.error("Ha ocurrido un problema", "No puede terminar una cuenta en ceros.");
-                return;
-            }
-
-            // volver a actualizar la VM
-            this.state = SystemState.PAGO;
-            this.mapFields();
-            return;
+           if (!subtotal())
+               return;
         }
 
         if (this.state == SystemState.PAGO) {
@@ -305,6 +321,7 @@ public class Sistema extends javax.swing.JDialog {
             // TERMINARVENTAA()
             // registrar el documento en DBMS
 
+            this.documento.observaciones = this.inputObservaciones.getText();
             boolean esVenta = this.documento.tipo_documento.tipo == 0;
             boolean res = this.documento.save();
             if (!res) {
@@ -313,16 +330,18 @@ public class Sistema extends javax.swing.JDialog {
             }
             for (DocumentoProducto p : this.documento.conceptos) {
                 p.id_documento = this.documento.id;
-                p.es_salida = this.documento.tipo_documento.tipo == 0;
+                p.tipo_inv = this.documento.tipo_documento.tipo;
                 p.existencia = p.producto.existencia;
                 p.save();
                 
                 // actualizar existencia
                 
+                if (this.documento.tipo_documento.tipo != 2){
                 if (esVenta) {
                     p.producto.existencia -= p.cantidad;
                 } else {
                     p.producto.existencia += p.cantidad;
+                }
                 }
 
                 p.producto.save();
@@ -332,7 +351,7 @@ public class Sistema extends javax.swing.JDialog {
             this.documento.tipo_documento.folio++;
             this.documento.tipo_documento.save();
             
-            Store.success("",  (esVenta ? "Venta" : "Compra") + " completada");
+            Store.success("",  "Documento tipo " + this.documento.tipo_documento.nombre + " completado satisfactoriamente.");
             // reiniciar la VM a su estado inicial
             this.reset();
             return;
@@ -398,9 +417,6 @@ public class Sistema extends javax.swing.JDialog {
 
         float subtotal = p.precio * cantidad;
         float impuestos = 0;
-        if (p.iva > 0) {
-            impuestos = (p.iva / 100) * subtotal;
-        }
 
         concepto.id = documento.conceptos.size();
         concepto.cantidad = cantidad;
@@ -434,11 +450,11 @@ public class Sistema extends javax.swing.JDialog {
         jScrollPane1 = new javax.swing.JScrollPane();
         tableConceptos = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
-        labelCodigo = new javax.swing.JLabel();
         inputCodigo = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
+        labelCodigo = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         selectTipoDoc = new javax.swing.JComboBox<>();
@@ -448,11 +464,14 @@ public class Sistema extends javax.swing.JDialog {
         jPanel4 = new javax.swing.JPanel();
         labelCliente = new javax.swing.JLabel();
         btnSeleccionarCliente = new javax.swing.JButton();
-        labelLogo = new javax.swing.JLabel();
-        jPanel2 = new javax.swing.JPanel();
-        labelSubtotal = new javax.swing.JLabel();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel6 = new javax.swing.JLabel();
+        jPanel6 = new javax.swing.JPanel();
+        labelObservaciones = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        inputObservaciones = new javax.swing.JTextArea();
         labelTotal = new javax.swing.JLabel();
-        labelImpuestos = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -469,9 +488,6 @@ public class Sistema extends javax.swing.JDialog {
         ));
         jScrollPane1.setViewportView(tableConceptos);
 
-        labelCodigo.setFont(new java.awt.Font("Lucida Grande", 0, 18)); // NOI18N
-        labelCodigo.setText("Código");
-
         jLabel3.setForeground(new java.awt.Color(80, 80, 80));
         jLabel3.setText("<cantidad>*<codigo>");
 
@@ -481,6 +497,9 @@ public class Sistema extends javax.swing.JDialog {
         jLabel5.setForeground(new java.awt.Color(80, 80, 80));
         jLabel5.setText("CAN<codigo> - Cancelar");
 
+        labelCodigo.setFont(new java.awt.Font("Lucida Grande", 0, 18)); // NOI18N
+        labelCodigo.setText("Código");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -489,8 +508,9 @@ public class Sistema extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
                         .addComponent(labelCodigo)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(inputCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 269, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
@@ -507,15 +527,15 @@ public class Sistema extends javax.swing.JDialog {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(labelCodigo)
-                    .addComponent(inputCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(inputCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(labelCodigo))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(jLabel3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel4)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(20, Short.MAX_VALUE))
         );
 
         jLabel2.setFont(new java.awt.Font("Lucida Grande", 0, 14)); // NOI18N
@@ -597,7 +617,7 @@ public class Sistema extends javax.swing.JDialog {
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(selectTipoDoc, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 277, Short.MAX_VALUE)
                 .addComponent(labelFolio)
                 .addGap(18, 18, 18)
                 .addComponent(paneInventario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -617,75 +637,111 @@ public class Sistema extends javax.swing.JDialog {
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        labelLogo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/itson-pos.png"))); // NOI18N
+        jPanel5.setBackground(new java.awt.Color(255, 54, 159));
 
-        labelSubtotal.setFont(new java.awt.Font("Lucida Grande", 0, 18)); // NOI18N
-        labelSubtotal.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        labelSubtotal.setText("Subtotal: ---");
+        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/logo-pink.png"))); // NOI18N
+        jLabel6.setText("jLabel2");
+        jLabel6.setMaximumSize(new java.awt.Dimension(200, 61));
+        jLabel6.setPreferredSize(new java.awt.Dimension(200, 61));
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        labelObservaciones.setFont(new java.awt.Font("Lucida Grande", 0, 14)); // NOI18N
+        labelObservaciones.setText("Observaciones");
+
+        inputObservaciones.setColumns(20);
+        inputObservaciones.setRows(5);
+        jScrollPane2.setViewportView(inputObservaciones);
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addComponent(labelObservaciones)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(labelObservaciones)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2)
+                .addContainerGap())
+        );
 
         labelTotal.setFont(new java.awt.Font("Lucida Grande", 0, 18)); // NOI18N
         labelTotal.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         labelTotal.setText("Total: ---");
 
-        labelImpuestos.setFont(new java.awt.Font("Lucida Grande", 0, 18)); // NOI18N
-        labelImpuestos.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        labelImpuestos.setText("Impuestos: ---");
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap(137, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(labelSubtotal, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(labelTotal, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(labelImpuestos, javax.swing.GroupLayout.Alignment.TRAILING))
-                .addGap(24, 24, 24))
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(labelSubtotal)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(labelImpuestos)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(labelTotal)
-                .addContainerGap(15, Short.MAX_VALUE))
-        );
+        jButton1.setBackground(new java.awt.Color(255, 54, 159));
+        jButton1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jButton1.setForeground(new java.awt.Color(255, 255, 255));
+        jButton1.setText("Guardar");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(labelLogo)
+                        .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 172, Short.MAX_VALUE)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(labelTotal)
+                                .addContainerGap())))))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(labelLogo, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(labelTotal)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton1)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -700,70 +756,34 @@ public class Sistema extends javax.swing.JDialog {
         this.fireClientesModal();
     }//GEN-LAST:event_btnSeleccionarClienteActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Sistema.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Sistema.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Sistema.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Sistema.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        procesarCodigo("sbt");
+    }//GEN-LAST:event_jButton1ActionPerformed
 
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                Sistema dialog = new Sistema(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSeleccionarCliente;
     private javax.swing.JTextField inputCodigo;
+    private javax.swing.JTextArea inputObservaciones;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel labelCliente;
     private javax.swing.JLabel labelCodigo;
     private javax.swing.JLabel labelFolio;
-    private javax.swing.JLabel labelImpuestos;
     private javax.swing.JLabel labelInventario;
-    private javax.swing.JLabel labelLogo;
-    private javax.swing.JLabel labelSubtotal;
+    private javax.swing.JLabel labelObservaciones;
     private javax.swing.JLabel labelTotal;
     private javax.swing.JPanel paneInventario;
     private javax.swing.JComboBox<String> selectTipoDoc;
