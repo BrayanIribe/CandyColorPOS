@@ -9,7 +9,6 @@ import dao.LobbyStats;
 import dao.Store;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import pantallasavance.Splash;
 
 /**
  *

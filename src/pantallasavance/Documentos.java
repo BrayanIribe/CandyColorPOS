@@ -37,6 +37,8 @@ public class Documentos extends javax.swing.JDialog {
      * Creates new form Clientes
      */
     public Documento documento;
+    private String modelName;
+    private boolean esVentas;
     public Vector<Documento> documentos;
 
     public Documentos(java.awt.Frame parent, boolean modal) {
@@ -44,6 +46,8 @@ public class Documentos extends javax.swing.JDialog {
         initComponents();
         setResizable(false);
         Store.centerFrame(this);
+        this.esVentas = false;
+        this.modelName = "Pedidos";
         this.documento = null;
         this.documentos = new Vector<Documento>();
         Documentos $vm = this;
@@ -79,6 +83,15 @@ public class Documentos extends javax.swing.JDialog {
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
 
     }
+    
+    public void esVentas(){
+        esVentas = true;
+        modelName = "Ventas";
+        labelTitle.setText("Ventas");
+        btnCancelar.setText("Cancelar venta seleccionada (F1)");
+        jLabel1.setText("Buscar ventas por cliente o folio");
+        this.mapFields();
+    }
 
     public void mapFields() {
         int row = table.getSelectedRow();
@@ -87,7 +100,7 @@ public class Documentos extends javax.swing.JDialog {
             this.documento = documentos.get(row);
         }
         
-        documentos = Documento.findDocumentos(this.inputKeyword.getText());
+        documentos = Documento.findDocumentos(this.inputKeyword.getText(), this.esVentas ? 2 : 1);
         String[] header = {"Id", "Documento", "Estado", "Tipo", "Cliente", "Total"};
         DefaultTableModel dtm = new DefaultTableModel() {
             public boolean isCellEditable(int row, int column) {
@@ -175,8 +188,9 @@ public class Documentos extends javax.swing.JDialog {
         labelTitle.setBackground(new java.awt.Color(255, 255, 255));
         labelTitle.setFont(labelTitle.getFont().deriveFont(labelTitle.getFont().getSize()+6f));
         labelTitle.setForeground(new java.awt.Color(255, 255, 255));
+        labelTitle.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         labelTitle.setText("Pedidos");
-        jPanel1.add(labelTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 20, -1, -1));
+        jPanel1.add(labelTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(416, 20, 200, -1));
 
         jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/logo-pink.png"))); // NOI18N
         jLabel6.setText("jLabel2");
@@ -377,6 +391,7 @@ public class Documentos extends javax.swing.JDialog {
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         // TODO add your handling code here:
         Sistema frm = new Sistema(null, true, null);
+        frm.setDocumento(esVentas ? "venta" : "pedido");
         frm.setVisible(true);
         // refrescar lista despues de cerrar el form
         this.mapFields();        // TODO add your handling code here:

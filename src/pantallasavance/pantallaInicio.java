@@ -117,10 +117,6 @@ public class pantallaInicio extends javax.swing.JFrame {
                 KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0),
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
         
-        if (false){
-            Sistema sistema = new Sistema(this, false);
-            sistema.setVisible(true);
-        }
 
     }
 
@@ -465,7 +461,7 @@ public class pantallaInicio extends javax.swing.JFrame {
 
     private void btnComprasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnComprasActionPerformed
         // TODO add your handling code here:
-        Sistema modal = new Sistema(this, rootPaneCheckingEnabled);
+        Sistema modal = new Sistema(this, rootPaneCheckingEnabled, null);
         modal.setVisible(true);
     }//GEN-LAST:event_btnComprasActionPerformed
 

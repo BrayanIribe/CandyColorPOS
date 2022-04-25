@@ -31,20 +31,24 @@ public class Clientes extends javax.swing.JDialog {
     /**
      * Creates new form Clientes
      */
+    private boolean esProveedores;
     public boolean isModal;
     public Cliente cliente;
     public Vector<Cliente> clientes;
     public Cliente selectedClient;
+    public String modelName;
 
     public Clientes(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         setResizable(false);
         Store.centerFrame(this);
+        this.modelName = "cliente";
         this.cliente = null;
         this.selectedClient = null;
         this.clientes = new Vector<Cliente>();
         this.isModal = modal;
+        this.esProveedores = false;
         this.query();
         Clientes $vm = this;
         this.table.addMouseListener(new MouseAdapter() {
@@ -63,7 +67,7 @@ public class Clientes extends javax.swing.JDialog {
                         $vm.dispose();
                         return;
                     }
-                    ClienteFrm frm = new ClienteFrm(null, true, selectedClient);
+                    ClienteFrm frm = new ClienteFrm(null, true, selectedClient, esProveedores);
                     frm.setVisible(true);
                     // refrescar lista despues de cerrar el form
                     $vm.query();
@@ -96,9 +100,19 @@ public class Clientes extends javax.swing.JDialog {
         this.btnEliminarCliente.setEnabled(false);
         this.inputKeyword.addActionListener(action);
     }
+    
+    public void esProveedores(){
+        esProveedores = true;
+        modelName = "proveedor";
+        jLabel1.setText("Buscar proveedores por Id o descripción");
+        labelTitle.setText("Proveedores");
+        btnEliminarCliente.setText("Eliminar proveedor seleccionado");
+        this.setTitle("Proveedores");
+        this.query();
+    }
 
     public void query() {
-        clientes = Cliente.find(this.inputKeyword.getText());
+        clientes = Cliente.find(this.inputKeyword.getText(), esProveedores);
         String[] header = {"Id", "Nombre", "RFC", "Telefono", "Calle"};
         DefaultTableModel dtm = new DefaultTableModel() {
             public boolean isCellEditable(int row, int column) {
@@ -164,8 +178,9 @@ public class Clientes extends javax.swing.JDialog {
         labelTitle.setBackground(new java.awt.Color(255, 255, 255));
         labelTitle.setFont(labelTitle.getFont().deriveFont(labelTitle.getFont().getSize()+6f));
         labelTitle.setForeground(new java.awt.Color(255, 255, 255));
+        labelTitle.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         labelTitle.setText("Clientes");
-        jPanel1.add(labelTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 20, -1, -1));
+        jPanel1.add(labelTitle, new org.netbeans.lib.awtextra.AbsoluteConstraints(235, 20, 380, -1));
 
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -259,14 +274,14 @@ public class Clientes extends javax.swing.JDialog {
             return;
         }
         
-        boolean isOk = Store.question("Confirmación", "¿Desea eliminar el cliente '" + selectedClient.nombre + "'? Este cambio será irreversible.");
+        boolean isOk = Store.question("Confirmación", "¿Desea eliminar el '" + modelName + ' ' + selectedClient.nombre + "'? Este cambio será irreversible.");
         if (!isOk) {
             return;
         }
 
         boolean result = selectedClient.delete();
         if (!result) {
-            Store.error("Error", "No se eliminó el cliente.");
+            Store.error("Error", "No se eliminó el " + modelName + ".");
             return;
         }
         
@@ -286,7 +301,7 @@ public class Clientes extends javax.swing.JDialog {
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
 // TODO add your handling code here:
-        ClienteFrm frm = new ClienteFrm(null, true, null);
+        ClienteFrm frm = new ClienteFrm(null, true, null, esProveedores);
         frm.setVisible(true);
         // refrescar lista despues de cerrar el form
         this.query();        // TODO add your handling code here:

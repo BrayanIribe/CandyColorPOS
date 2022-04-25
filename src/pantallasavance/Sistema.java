@@ -126,6 +126,7 @@ public class Sistema extends javax.swing.JDialog {
                 KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0),
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
 
+        if (false)
         $vm.getRootPane().registerKeyboardAction(selectTipoDocListener,
                 KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0),
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -153,8 +154,11 @@ public class Sistema extends javax.swing.JDialog {
             keys[i] = String.format("%s", d.nombre);
         }
 
+        int lastIdx = this.selectTipoDoc.getModel().getSize() > 0 ? this.selectTipoDoc.getSelectedIndex() : 0;
         DefaultComboBoxModel selectVentaModel = new DefaultComboBoxModel(keys);
         this.selectTipoDoc.setModel(selectVentaModel);
+        if (lastIdx > 0)
+        this.selectTipoDoc.setSelectedIndex(lastIdx);
 
         dtm = new DefaultTableModel() {
             public boolean isCellEditable(int row, int column) {
@@ -435,6 +439,17 @@ public class Sistema extends javax.swing.JDialog {
             this.documento.conceptos.add(concepto);
         }
 
+        this.mapFields();
+    }
+    
+    
+    public void setDocumento(String documentoName){
+        if (documentoName.equals("venta")){
+            this.selectTipoDoc.setSelectedIndex(1);
+        }else if (documentoName.equals("pedido")){
+            this.selectTipoDoc.setSelectedIndex(0);
+        }
+        this.selectTipoDoc.setEnabled(false);
         this.mapFields();
     }
 

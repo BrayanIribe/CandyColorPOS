@@ -16,16 +16,20 @@ import java.util.Vector;
 public class ClienteFrm extends javax.swing.JDialog {
 
     private Cliente cliente;
+    private boolean esProveedores;
+    private String modelName;
 
     /**
      * Creates new form nuevoArticulo
      */
-    public ClienteFrm(java.awt.Frame parent, boolean modal, Cliente c) {
+    public ClienteFrm(java.awt.Frame parent, boolean modal, Cliente c, boolean esProveedores) {
         super(parent, modal);
         initComponents();
         setResizable(false);
         Store.centerFrame(this);
         this.cliente = c;
+        this.esProveedores = esProveedores;
+        this.modelName = esProveedores ? "proveedor" : "cliente";
         this.mapFields();
         Store.attachKeys(this, true);
     }
@@ -35,11 +39,11 @@ public class ClienteFrm extends javax.swing.JDialog {
     }
 
     public void mapFields() {
-        this.labelTitle.setText("Actualizar cliente");
+        this.labelTitle.setText("Actualizar " + modelName);
         this.btnEliminar.setVisible(true);
         if (this.cliente == null || this.cliente.id == 0) {
             this.cliente = new Cliente();
-            this.labelTitle.setText("Crear nuevo cliente");
+            this.labelTitle.setText("Crear nuevo " + modelName);
             this.btnEliminar.setVisible(false);
             return;
         }
@@ -370,9 +374,9 @@ public class ClienteFrm extends javax.swing.JDialog {
             // validar si es publico en general
             
             boolean isPublicoGeneral = this.inputRfc.getText().equalsIgnoreCase("XAXX0101000");
-            Vector<Cliente> clientes = Cliente.find("XAXX0101000");
+            Vector<Cliente> clientes = Cliente.find("XAXX0101000", esProveedores);
             if (isPublicoGeneral && clientes.get(0).id != this.cliente.id){
-                Store.error("Ha ocurrido un problema", "No puede tener mas de un cliente publico en general.");
+                Store.error("Ha ocurrido un problema", "No puede tener mas de un " + modelName + " publico en general.");
                 return;
             }
 
@@ -394,6 +398,7 @@ public class ClienteFrm extends javax.swing.JDialog {
             c.num = this.inputNum.getText();
             c.colonia = this.inputColonia.getText();
             c.codigo_postal = cp;
+            c.es_proveedor = this.esProveedores;
 
             c.save();
             this.dispose();
@@ -428,7 +433,7 @@ public class ClienteFrm extends javax.swing.JDialog {
             return;
         }
 
-        boolean isOk = Store.question("Confirmación", "¿Está seguro que desea eliminar el cliente? Este cambio será irreversible.");
+        boolean isOk = Store.question("Confirmación", "¿Está seguro que desea eliminar el " + modelName + "? Este cambio será irreversible.");
         if (!isOk) {
             return;
         }
@@ -450,64 +455,6 @@ public class ClienteFrm extends javax.swing.JDialog {
     private void inputRfcActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputRfcActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_inputRfcActionPerformed
-
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ClienteFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ClienteFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ClienteFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ClienteFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                ClienteFrm dialog = new ClienteFrm(new javax.swing.JFrame(), true, null);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEliminar;

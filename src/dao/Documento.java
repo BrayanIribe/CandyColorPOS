@@ -183,7 +183,7 @@ public class Documento {
         return v;
     }
     
-    public static Vector<Documento> findDocumentos(String keyword) {
+    public static Vector<Documento> findDocumentos(String keyword, int id_tipo_documento) {
         Vector<Documento> v = new Vector<Documento>();
         try {
             String where = "";
@@ -193,7 +193,7 @@ public class Documento {
             String sql = String.format(
                     "select d.* from documentos d "
                             + "left join clientes c on d.id_cliente_proveedor = c.id "
-                            + " where d.id_status=1 %s order by d.id desc", where
+                            + " where d.id_status=1 and d.id_tipo_documento=" + String.valueOf(id_tipo_documento) + " %s order by d.id desc", where
             );
 
             Statement s = Store.drv.createQuery();

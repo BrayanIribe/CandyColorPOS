@@ -66,7 +66,7 @@ public class Driver {
                 + "(id integer primary key, nombre string,"
                 + "rfc string, referencia string, calle string, num string,"
                 + "colonia string, municipio string, estado string, pais string,"
-                + "codigo_postal integer, telefono string, correo string,"
+                + "codigo_postal integer, telefono string, correo string, es_proveedor integer,"
                 + "updatedAt integer, createdAt integer)");
 
         // crear cliente publico en general, en caso de no existir

@@ -29,6 +29,7 @@ public class Cliente {
     public int codigo_postal;
     public String telefono;
     public String correo;
+    public boolean es_proveedor;
 
     public Cliente() {
         id = 0;
@@ -44,6 +45,7 @@ public class Cliente {
         telefono = "";
         correo = "";
         codigo_postal = 85000;
+        es_proveedor = false;
     }
 
     /**
@@ -58,11 +60,11 @@ public class Cliente {
 
             String sql = String.format("insert or replace into clientes "
                     + "(id, nombre, rfc, referencia, calle, num, colonia, municipio,"
-                    + "estado, pais, codigo_postal, telefono, correo) values"
+                    + "estado, pais, codigo_postal, telefono, correo, es_proveedor) values"
                     + "(%d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', %d,"
-                    + "'%s', '%s')", this.id, this.nombre, this.rfc, this.referencia, this.calle,
+                    + "'%s', '%s', %d)", this.id, this.nombre, this.rfc, this.referencia, this.calle,
                     this.num, this.colonia, this.municipio, this.estado, this.pais,
-                    this.codigo_postal, this.telefono, this.correo);
+                    this.codigo_postal, this.telefono, this.correo, this.es_proveedor == true ? 1 : 0);
             Statement s = Store.drv.createQuery();
             s.executeUpdate(sql);
             return true;
@@ -85,6 +87,18 @@ public class Cliente {
             Store.error("Ha ocurrido un problema", e.getMessage());
         }
         return false;
+    }
+    
+    public void setEsProveedor(){
+        this.es_proveedor = true;
+    }
+    
+    public void setEsCliente(){
+        this.es_proveedor = false;
+    }
+    
+    public boolean esProveedor(){
+        return this.es_proveedor == true;
     }
 
     private static Cliente unserialize(ResultSet rs) throws SQLException {
@@ -117,10 +131,10 @@ public class Cliente {
         }
     }
 
-    public static Vector<Cliente> find(String keyword) {
+    public static Vector<Cliente> find(String keyword, boolean esProveedores) {
         Vector<Cliente> v = new Vector<Cliente>();
         try {
-            String sql = "select * from clientes where 1 ";
+            String sql = "select * from clientes where es_proveedor = " + (esProveedores == true ? '1' : '0') + " ";
             if (keyword != null && Store.isNumeric(keyword)){
                 int code = Integer.valueOf(keyword);
                 sql += String.format("and (id=%d or codigo_postal=%d or num LIKE '%%%s%%')", code, code, keyword);

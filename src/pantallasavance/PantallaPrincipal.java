@@ -35,6 +35,8 @@ public class PantallaPrincipal extends javax.swing.JFrame {
         btnProductos = new javax.swing.JButton();
         btnClientes = new javax.swing.JButton();
         btnPedidos = new javax.swing.JButton();
+        btnClientes1 = new javax.swing.JButton();
+        btnPedidos1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(255, 54, 159));
@@ -53,7 +55,7 @@ public class PantallaPrincipal extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addGap(0, 383, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -94,31 +96,57 @@ public class PantallaPrincipal extends javax.swing.JFrame {
             }
         });
 
+        btnClientes1.setBackground(new java.awt.Color(255, 54, 159));
+        btnClientes1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        btnClientes1.setForeground(new java.awt.Color(255, 255, 255));
+        btnClientes1.setText("Administrar proveedores");
+        btnClientes1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClientes1ActionPerformed(evt);
+            }
+        });
+
+        btnPedidos1.setBackground(new java.awt.Color(255, 54, 159));
+        btnPedidos1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        btnPedidos1.setForeground(new java.awt.Color(255, 255, 255));
+        btnPedidos1.setText("Administrar ventas");
+        btnPedidos1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPedidos1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(166, Short.MAX_VALUE)
+                .addContainerGap(158, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(btnClientes, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnPedidos, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnProductos, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(139, 139, 139))
+                    .addComponent(btnPedidos1, javax.swing.GroupLayout.PREFERRED_SIZE, 292, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnPedidos, javax.swing.GroupLayout.PREFERRED_SIZE, 292, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnClientes, javax.swing.GroupLayout.PREFERRED_SIZE, 292, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnClientes1)
+                    .addComponent(btnProductos, javax.swing.GroupLayout.PREFERRED_SIZE, 292, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(130, 130, 130))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(47, 47, 47)
                 .addComponent(btnClientes)
-                .addGap(39, 39, 39)
+                .addGap(18, 18, 18)
+                .addComponent(btnClientes1)
+                .addGap(18, 18, 18)
                 .addComponent(btnProductos)
-                .addGap(38, 38, 38)
+                .addGap(18, 18, 18)
                 .addComponent(btnPedidos)
-                .addContainerGap(82, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(btnPedidos1)
+                .addContainerGap(41, Short.MAX_VALUE))
         );
 
-        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 60, 580, 320));
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 60, 580, 350));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -140,6 +168,20 @@ public class PantallaPrincipal extends javax.swing.JFrame {
         Documentos modal = new Documentos(this, rootPaneCheckingEnabled);
         modal.setVisible(true);
     }//GEN-LAST:event_btnPedidosActionPerformed
+
+    private void btnClientes1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClientes1ActionPerformed
+        // TODO add your handling code here:
+        Clientes cliente = new Clientes(this, false);
+        cliente.esProveedores();
+        cliente.setVisible(true);
+    }//GEN-LAST:event_btnClientes1ActionPerformed
+
+    private void btnPedidos1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPedidos1ActionPerformed
+        // TODO add your handling code here:
+        Documentos modal = new Documentos(this, rootPaneCheckingEnabled);
+        modal.esVentas();
+        modal.setVisible(true);
+    }//GEN-LAST:event_btnPedidos1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -178,7 +220,9 @@ public class PantallaPrincipal extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClientes;
+    private javax.swing.JButton btnClientes1;
     private javax.swing.JButton btnPedidos;
+    private javax.swing.JButton btnPedidos1;
     private javax.swing.JButton btnProductos;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
